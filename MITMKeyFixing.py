@@ -20,10 +20,10 @@ def generatePrivateKeys(p):
 
     return private_key_A, private_key_B, private_key_C
 
-def calculatePublicKeys(p, g, privateA, privateB):
+def calculatePublicKeys(p, g, privateA, privateB, privateM):
    public_A = pow(g, privateA, p)
    public_B = pow(g, privateB, p)
-   public_M = pow(g, private_M, p)
+   public_M = pow(g, privateM, p)
 
    return public_A, public_B, public_M
 
@@ -97,7 +97,7 @@ def bobSendsMalloryInterceptsAliceReads(msg, BMk, AMk):
     print("Alice reads, '", m_dec_cipherText.decode(), "'\n", sep='')
 
 
-if __name__ == '__main__':
+def task2Part1Procedure():
    p = 'B10B8f96A080E01DDE92DE5EAE5D54EC52C99FBCFB06A3C69A6A9DCA52D23B616073E28675A23D189838EF1E2EE652C013ECB4AEA906112324975C3CD49B83BFACCBDD7D90C4BD7098488E9C219A73724EFFD6FAE5644738FAA31A4FF55BCCC0A151AF5F0DC8B4BD45BF37DF365C1A65E68CFDA76D4DA708DF1FB2BC2E4A4371'
    g = 'A4D1CBD5C3FD34126765A442EFB99905F8104DD258AC507FD6406CFF14266D31266FEA1E5C41564B777E690F5504F213160217B4B01B886A5E91547F9E2749F4D7FBD7D3B9A92EE1909D0D2263F80A76A6A24C087A091F531DBF0A0169B6A28AD662A4D18E73AFA32D779D5918D08BC8858F4DCEF97C2A24855E6EEB22B3B2E5'
    p = int(p, 16)
@@ -105,31 +105,20 @@ if __name__ == '__main__':
 
    private_A, private_B, private_M = generatePrivateKeys(p)
 
-   #print("privA =", private_A)
-   #print("privB =", private_B)
-
-   public_A, public_B, public_M = calculatePublicKeys(p, g, private_A, private_B)
-
-   #print("Alice's public key = ", str(public_A)[:SHARED_KEY_LENGTH], "...", sep='')
-   #print("Bob's public key = ", str(public_B)[:SHARED_KEY_LENGTH], "...\n", sep='')
+   public_A, public_B, public_M = calculatePublicKeys(p, g, private_A, private_B, private_M)
 
    # Mallory impersonates as Bob
    not_public_B = public_M
    print("Mallory changes Bob's public key to his => ", str(public_M)[:SHARED_KEY_LENGTH], "...", sep='')
    A_shared = generateAliceSecretKey(not_public_B, private_A, p)
    print("Alice's shared secret key with 'Bob' is generated...\n")
-   #M_shared_with_Alice = mallorySecretKey(public_A, private_M, p)
-   #print(A_shared == M_shared_with_Alice)
 
    # Mallory impersonates as Alice
    not_public_A = public_M
    print("Mallory changes Alice's public key to his => ", str(public_M)[:SHARED_KEY_LENGTH], "...", sep='')
    B_shared = generateBobSecretKey(not_public_A, private_B, p)
    print("Bob's shared secret key with 'Alice' is generated...\n")
-   #M_shared_with_Bob = mallorySecretKey(public_B, private_M, p)
-   #print(B_shared == M_shared_with_Bob)
 
-   #print("Alice and Bob's secret keys are generated")
    print("Are Alice and Bob's shared keys equal? => ", A_shared == B_shared, "... they are talking to Mallory!\n", sep='')
 
    msg = input("Alice sends a message to Bob:\n")
@@ -139,6 +128,37 @@ if __name__ == '__main__':
    msg = input("Bob sends a message to Alice:\n")
 
    bobSendsMalloryInterceptsAliceReads(msg, B_shared, A_shared)
+
+
+def task2Part2Procedure():
+    g = int(input("Please enter a generator value:\n"))
+
+    private_A, private_B, private_M = generatePrivateKeys(p)
+    public_A, public_B, public_M = calculatePublicKeys(p, g, private_A, private_B, private_M)
+
+    A_shared = generateAliceSecretKey(public_B, private_A, p)
+    B_shared = generateBobSecretKey(public_A, private_B, p)
+
+    print("Are Alice and Bob's shared keys equal? => ", A_shared == B_shared, "... they are talking to Mallory!\n", sep='')
+
+    msg = input("Alice sends a message to Bob:\n")
+
+    aliceSendsMalloryInterceptsBobReads(msg, A_shared, B_shared)
+
+    msg = input("Bob sends a message to Alice:\n")
+
+    bobSendsMalloryInterceptsAliceReads(msg, B_shared, A_shared)
+
+
+if __name__ == '__main__':
+   p = 'B10B8f96A080E01DDE92DE5EAE5D54EC52C99FBCFB06A3C69A6A9DCA52D23B616073E28675A23D189838EF1E2EE652C013ECB4AEA906112324975C3CD49B83BFACCBDD7D90C4BD7098488E9C219A73724EFFD6FAE5644738FAA31A4FF55BCCC0A151AF5F0DC8B4BD45BF37DF365C1A65E68CFDA76D4DA708DF1FB2BC2E4A4371'
+   g = 'A4D1CBD5C3FD34126765A442EFB99905F8104DD258AC507FD6406CFF14266D31266FEA1E5C41564B777E690F5504F213160217B4B01B886A5E91547F9E2749F4D7FBD7D3B9A92EE1909D0D2263F80A76A6A24C087A091F531DBF0A0169B6A28AD662A4D18E73AFA32D779D5918D08BC8858F4DCEF97C2A24855E6EEB22B3B2E5'
+   p = int(p, 16)
+   g = int(g, 16)
+
+   task2Part1Procedure()
+
+   task2Part2Procedure()
 
 
 
